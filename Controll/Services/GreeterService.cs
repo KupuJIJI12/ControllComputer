@@ -1,26 +1,25 @@
+using System.IO;
+using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Controll
+namespace Controll.Services
 {
-    public class GreeterService : Greeter.GreeterBase
+    public class ControllService : Controll.ControllBase
     {
-        private readonly ILogger<GreeterService> _logger;
-        public GreeterService(ILogger<GreeterService> logger)
+        private readonly ILogger<ControllService> _logger;
+        public ControllService(ILogger<ControllService> logger)
         {
             _logger = logger;
         }
 
-        public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
+        public override Task<Empty> SetCommand(CommandRequest request, ServerCallContext context)
         {
-            return Task.FromResult(new HelloReply
-            {
-                Message = "Hello " + request.Name
-            });
+            var task = new RunTask(new FileInfo(request.Path));
+            if(request.Command == Commands.Open) task.OpenFile();
+            else task.CloseFile();
+            return Task.FromResult(new Empty());
         }
     }
 }
